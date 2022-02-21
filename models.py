@@ -2,7 +2,7 @@ import random
 
 import pygame
 
-from settings import img_player, img_bullet, img_rocks
+from settings import img_player, img_bullet, img_rocks, shoot_sound, all_sprites, rock_sprites, bullet_sprites
 
 
 class Player(pygame.sprite.Sprite):
@@ -47,10 +47,11 @@ class Player(pygame.sprite.Sprite):
         if self.rect.bottom > self.screen_height:
             self.rect.bottom = self.screen_height
 
-    def shoot(self, all_sprites, bullets):
+    def shoot(self):
         bullet = Bullet(self.rect.centerx, self.rect.top)
         all_sprites.add(bullet)
-        bullets.add(bullet)
+        bullet_sprites.add(bullet)
+        shoot_sound.play()
 
 
 class Rock(pygame.sprite.Sprite):
@@ -67,14 +68,23 @@ class Rock(pygame.sprite.Sprite):
         self.radius = self.rect.width / 2 * 0.8
         # pygame.draw.circle(self.image, (255, 0, 0), self.rect.center, self.radius)
 
-        # self.rect.x = random.randint(0, self.screen_weight - self.rect.width)
-        # self.rect.y = random.randint(-50, 0)
-        self.speed_x = 0
-        self.speed_y = 0
-        self.rotate_degree = 0  # 旋轉角度
-        self.reset_rock_args()
+        self.rect.x = random.randint(0, self.screen_weight - self.rect.width)
+        self.rect.y = random.randint(-150, -100)
+        self.speed_x = random.randint(-3, 3)  # 往左或往右偏移
+        self.speed_y = random.randint(2, 10)
+        self.rotate_degree = self.speed_x
 
         self.rotate_degree_total = 0
+
+    @classmethod
+    def create_rocks(cls, groups=None, num=1):
+        if not groups:
+            groups = [all_sprites, rock_sprites]
+
+        for i in range(num):
+            new_rock = cls()
+            for group in groups:
+                group.add(new_rock)
 
     def update(self):
         self.rotate()
@@ -82,19 +92,9 @@ class Rock(pygame.sprite.Sprite):
         self.rect.y += self.speed_y
 
         if self.rect.top > self.screen_height or self.rect.left > self.screen_weight or self.rect.right < 0:
-            self.reset_rock_args()
-
-    def reset_rock_args(self):
-        """
-        重設石頭的大小、掉落位置及速度
-        """
-        self.image_orig = random.choice(img_rocks)
-        self.image_orig.set_colorkey((0, 0, 0))
-        self.rect.x = random.randint(0, self.screen_weight - self.rect.width)
-        self.rect.y = random.randint(-150, -100)
-        self.speed_x = random.randint(-3, 3)  # 往左或往右偏移
-        self.speed_y = random.randint(2, 10)
-        self.rotate_degree = self.speed_x
+            # 當石頭超出邊界時，直接刪除這個石頭並建立新的石頭(從上面掉下來)
+            self.kill()
+            Rock.create_rocks()
 
     def rotate(self):
         """
