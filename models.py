@@ -35,7 +35,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.x += self.speed_x
         elif key_pressed[pygame.K_LEFT]:
             self.rect.x -= self.speed_x
-        elif key_pressed[pygame.K_UP]:
+        if key_pressed[pygame.K_UP]:
             self.rect.y -= self.speed_y
         elif key_pressed[pygame.K_DOWN]:
             self.rect.y += self.speed_y
