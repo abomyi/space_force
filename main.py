@@ -3,7 +3,7 @@ import os
 import pygame
 
 # 初始化pygame
-from models import Player, Rock
+from models import Player, Rock, Explosion
 from settings import img_bg, init_pygame_screen, FPS, font_name, sound_explore1, sound_explore2, all_sprites, \
     rock_sprites, bullet_sprites
 
@@ -96,12 +96,17 @@ while running:
         else:
             sound_explore2.play()
 
+        # 播放爆炸動畫
+        Explosion.create_animate(hit_rock.rect.center, 'large')
+
         Rock.create_rocks()
 
     # 判斷石頭是否跟碰撞主角碰撞 (預設是矩形碰撞模式，這裡改成用圓形檢查碰撞較為準確)
     hits = pygame.sprite.spritecollide(player, rock_sprites, True, pygame.sprite.collide_circle)
     for hit in hits:
         player.health -= hit.radius
+        Explosion.create_animate(hit.rect.center, 'small')
+
         Rock.create_rocks()
         if player.health <= 0:
             running = False

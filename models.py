@@ -2,7 +2,8 @@ import random
 
 import pygame
 
-from settings import img_player, img_bullet, img_rocks, shoot_sound, all_sprites, rock_sprites, bullet_sprites
+from settings import img_player, img_bullet, img_rocks, shoot_sound, all_sprites, rock_sprites, bullet_sprites, \
+    explore_animation
 
 
 class Player(pygame.sprite.Sprite):
@@ -134,3 +135,33 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.y += self.speed_y
         if self.rect.bottom < 0:
             self.kill()
+
+
+class Explosion(pygame.sprite.Sprite):
+    def __init__(self, center, size):
+        pygame.sprite.Sprite.__init__(self)
+        self.size = size
+        self.image = explore_animation[self.size][0]
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.frame = 0
+        self.last_update_time = pygame.time.get_ticks()  # 紀錄建立物件後經過了幾毫秒
+        self.frame_rate = 30  # 每幾毫秒更新一次
+
+    @classmethod
+    def create_animate(cls, center, size):
+        animate = cls(center, size)
+        all_sprites.add(animate)
+
+    def update(self):
+        now = pygame.time.get_ticks()
+        if now - self.last_update_time > self.frame_rate:
+            self.last_update_time = now
+            self.frame += 1
+            if self.frame == len(explore_animation[self.size]):
+                self.kill()
+            else:
+                center = self.rect.center
+                self.image = explore_animation[self.size][self.frame]
+                self.rect = self.image.get_rect()
+                self.rect.center = center

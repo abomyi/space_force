@@ -20,6 +20,15 @@ img_bullet = pygame.image.load(os.path.join('img', 'bullet.png')).convert()
 img_rocks = []
 for i in range(7):
     img_rocks.append(pygame.image.load(os.path.join('img', f'rock{i}.png')).convert())
+explore_animation = {
+    'large': [],
+    'small': []
+}
+for i in range(9):
+    img_explore = pygame.image.load(os.path.join('img', f'expl{i}.png')).convert()
+    img_explore.set_colorkey((0, 0, 0))
+    explore_animation['large'].append(pygame.transform.scale(img_explore, (75, 75)))
+    explore_animation['small'].append(pygame.transform.scale(img_explore, (30, 30)))
 
 # 載入音效
 shoot_sound = pygame.mixer.Sound(os.path.join("sound", "shoot.wav"))
