@@ -26,13 +26,12 @@ pygame.display.update()
 
 def draw_text(surf, text, size, x, y):
     """
-
-    :param surf:
-    :param text:
-    :param size:
-    :param x:
-    :param y:
-    :return:
+    顯示遊戲分數
+    :param surf: 要畫在哪個地方
+    :param text: 要顯示的文字
+    :param size: 文字大小
+    :param x: 要顯示在的X座標
+    :param y: 要顯示在的Y座標
     """
     font = pygame.font.Font(font_name, size)
     text_surface = font.render(text, True, (255, 255, 255))
@@ -40,6 +39,31 @@ def draw_text(surf, text, size, x, y):
     text_rect.centerx = x
     text_rect.top = y
     surf.blit(text_surface, text_rect)
+
+
+def draw_health(surf, hp_default, hp, x, y):
+    """
+    顯示血量
+    :param surf:
+    :param hp_default: 原先血量 (用於計算%數)
+    :param hp: 現有血量
+    :param x:
+    :param y:
+    """
+    if hp < 0:
+        hp = 0
+    bar_length = 100  # 血條最大長度
+    bar_height = 10  # 血條高度
+
+    # 計算血量%數
+    health_percentage = (hp / hp_default) * bar_length
+    # 如果血量剩餘%數大於血條長度，鎖死長度
+    # health_percentage = bar_length if health_percentage > bar_length else health_percentage
+
+    fill_rect = pygame.Rect(x, y, health_percentage, bar_height)  # 要填滿的血條
+    outline_rect = pygame.Rect(x, y, bar_length, bar_height)  # 血條外框
+    pygame.draw.rect(surf, (0, 255, 0), fill_rect)
+    pygame.draw.rect(surf, (255, 255, 255), outline_rect, 2)
 
 
 # 播放背景音樂(永不停止)
@@ -75,15 +99,19 @@ while running:
         Rock.create_rocks()
 
     # 判斷石頭是否跟碰撞主角碰撞 (預設是矩形碰撞模式，這裡改成用圓形檢查碰撞較為準確)
-    hits = pygame.sprite.spritecollide(player, rock_sprites, False, pygame.sprite.collide_circle)
-    # if hits:
-    #     running = False
+    hits = pygame.sprite.spritecollide(player, rock_sprites, True, pygame.sprite.collide_circle)
+    for hit in hits:
+        player.health -= hit.radius
+        Rock.create_rocks()
+        if player.health <= 0:
+            running = False
 
     # 更新畫面顯示
     # screen.fill((255, 255, 255))  # 每次更新畫面的時候都要重設整個佈局(不然之前渲染的東西會一直停留在畫面上)，這裡會每次都先刷新成空白
     screen.blit(img_bg, (0, 0))
     all_sprites.draw(screen)  # 顯示所有角色物件
     draw_text(screen, f'score: {int(score)}', 18, screen.get_width() / 2, 10)
+    draw_health(screen, player.health_default, player.health, 5, 10)
     pygame.display.update()  # 套用上述所有更動到視窗呈現
 
 pygame.quit()

@@ -25,6 +25,9 @@ class Player(pygame.sprite.Sprite):
         self.speed_x = 10
         self.speed_y = 10
 
+        self.health_default = 100
+        self.health = self.health_default  # 設定血量
+
     def update(self):
         # 根據玩家按下的方向鍵，控制物件位移
         key_pressed = pygame.key.get_pressed()
