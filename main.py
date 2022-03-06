@@ -3,7 +3,7 @@ import pygame
 # 初始化pygame
 from models import Player, Rock, Explosion
 from settings import img_bg, init_pygame_screen, FPS, font_name, sound_explore1, sound_explore2, all_sprites, \
-    rock_sprites, bullet_sprites, sound_dead
+    rock_sprites, bullet_sprites, sound_dead, img_player_life
 
 screen = init_pygame_screen()
 
@@ -62,6 +62,22 @@ def draw_health(surf, hp_default, hp, x, y):
     outline_rect = pygame.Rect(x, y, bar_length, bar_height)  # 血條外框
     pygame.draw.rect(surf, (0, 255, 0), fill_rect)
     pygame.draw.rect(surf, (255, 255, 255), outline_rect, 2)
+
+
+def draw_lives(surf, lives, img):
+    """
+    顯示剩餘幾條命
+    :param surf:
+    :param lives:
+    :param img:
+    :return:
+    """
+    surf_width = surf.get_width()
+    for i in range(lives):
+        img_rect = img.get_rect()
+        img_rect.x = (surf_width - 35) - (img_rect.width + 10) * i
+        img_rect.y = 15
+        surf.blit(img, img_rect)
 
 
 # 播放背景音樂(永不停止)
@@ -124,6 +140,7 @@ while running:
     all_sprites.draw(screen)  # 顯示所有角色物件
     draw_text(screen, f'score: {int(score)}', 18, screen.get_width() / 2, 10)
     draw_health(screen, player.health_default, player.health, 5, 10)
+    draw_lives(screen, player.lives, img_player_life)
     pygame.display.update()  # 套用上述所有更動到視窗呈現
 
 pygame.quit()

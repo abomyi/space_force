@@ -15,7 +15,8 @@ pygame.display.set_caption('視窗標題')
 # 載入圖片
 img_bg = pygame.image.load(os.path.join('img', 'background.png')).convert()
 img_player = pygame.image.load(os.path.join('img', 'player.png')).convert()
-# img_rock = pygame.image.load(os.path.join('img', 'rock.png')).convert()
+img_player_life = pygame.transform.scale(img_player, (25, 19))
+img_player_life.set_colorkey((0, 0, 0))
 img_bullet = pygame.image.load(os.path.join('img', 'bullet.png')).convert()
 img_rocks = []
 for i in range(7):
