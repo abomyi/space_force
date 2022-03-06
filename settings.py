@@ -22,13 +22,18 @@ for i in range(7):
     img_rocks.append(pygame.image.load(os.path.join('img', f'rock{i}.png')).convert())
 explore_animation = {
     'large': [],
-    'small': []
+    'small': [],
+    'player': []
 }
 for i in range(9):
     img_explore = pygame.image.load(os.path.join('img', f'expl{i}.png')).convert()
     img_explore.set_colorkey((0, 0, 0))
     explore_animation['large'].append(pygame.transform.scale(img_explore, (75, 75)))
     explore_animation['small'].append(pygame.transform.scale(img_explore, (30, 30)))
+
+    img_explore_player = pygame.image.load(os.path.join('img', f'player_expl{i}.png')).convert()
+    img_explore_player.set_colorkey((0, 0, 0))
+    explore_animation['player'].append(img_explore_player)
 
 # 載入音效
 shoot_sound = pygame.mixer.Sound(os.path.join("sound", "shoot.wav"))
@@ -37,6 +42,7 @@ shield_sound = pygame.mixer.Sound(os.path.join("sound", "pow0.wav"))
 die_sound = pygame.mixer.Sound(os.path.join("sound", "rumble.ogg"))
 sound_explore1 = pygame.mixer.Sound(os.path.join("sound", "expl0.wav"))
 sound_explore2 = pygame.mixer.Sound(os.path.join("sound", "expl1.wav"))
+sound_dead = pygame.mixer.Sound(os.path.join("sound", "rumble.ogg"))
 
 # 載入背景音樂及音量設定
 pygame.mixer.music.load(os.path.join("sound", "background.ogg"))

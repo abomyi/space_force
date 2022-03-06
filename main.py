@@ -5,7 +5,7 @@ import pygame
 # 初始化pygame
 from models import Player, Rock, Explosion
 from settings import img_bg, init_pygame_screen, FPS, font_name, sound_explore1, sound_explore2, all_sprites, \
-    rock_sprites, bullet_sprites
+    rock_sprites, bullet_sprites, sound_dead
 
 screen = init_pygame_screen()
 
@@ -109,7 +109,11 @@ while running:
 
         Rock.create_rocks()
         if player.health <= 0:
+            sound_dead.play()
+            Explosion.create_animate(player.rect.center, 'player')
             running = False
+        else:
+            sound_explore1.play()
 
     # 更新畫面顯示
     # screen.fill((255, 255, 255))  # 每次更新畫面的時候都要重設整個佈局(不然之前渲染的東西會一直停留在畫面上)，這裡會每次都先刷新成空白
