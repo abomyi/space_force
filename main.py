@@ -1,5 +1,3 @@
-import os
-
 import pygame
 
 # 初始化pygame
@@ -70,6 +68,7 @@ def draw_health(surf, hp_default, hp, x, y):
 pygame.mixer.music.play(-1)
 
 running = True
+dead_animate = None
 while running:
     # 維持遊戲視窗
     clock.tick(FPS)  # 程式一秒鐘能執行幾次
@@ -110,10 +109,14 @@ while running:
         Rock.create_rocks()
         if player.health <= 0:
             sound_dead.play()
-            Explosion.create_animate(player.rect.center, 'player')
-            running = False
+            dead_animate = Explosion.create_animate(player.rect.center, 'player')
+
+            player.die()
         else:
             sound_explore1.play()
+
+    if player.lives == 0 and not dead_animate.alive():
+        running = False
 
     # 更新畫面顯示
     # screen.fill((255, 255, 255))  # 每次更新畫面的時候都要重設整個佈局(不然之前渲染的東西會一直停留在畫面上)，這裡會每次都先刷新成空白

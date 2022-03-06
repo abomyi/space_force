@@ -29,7 +29,19 @@ class Player(pygame.sprite.Sprite):
         self.health_default = 100
         self.health = self.health_default  # 設定血量
 
+        self.lives = 3
+        self.hidden = False
+        self.hide_time = 0
+
     def update(self):
+        if self.hidden and pygame.time.get_ticks() - self.hide_time > 1000 and self.lives > 0:
+            self.hidden = False
+            self.rect.center = (self.screen_weight / 2, self.screen_height - 20)
+
+        if self.hidden:
+            # 如果物件處於消失狀態，禁止任何操作
+            return
+
         # 根據玩家按下的方向鍵，控制物件位移
         key_pressed = pygame.key.get_pressed()
         if key_pressed[pygame.K_RIGHT]:
@@ -52,10 +64,24 @@ class Player(pygame.sprite.Sprite):
             self.rect.bottom = self.screen_height
 
     def shoot(self):
+        if self.hidden:
+            # 隱形狀態不能射擊
+            return
+
         bullet = Bullet(self.rect.centerx, self.rect.top)
         all_sprites.add(bullet)
         bullet_sprites.add(bullet)
         shoot_sound.play()
+
+    def hide(self):
+        self.hidden = True
+        self.hide_time = pygame.time.get_ticks()
+        self.rect.center = (-self.screen_weight, -self.screen_height)
+
+    def die(self):
+        self.hide()
+        self.health = self.health_default
+        self.lives -= 1
 
 
 class Rock(pygame.sprite.Sprite):
@@ -152,6 +178,7 @@ class Explosion(pygame.sprite.Sprite):
     def create_animate(cls, center, size):
         animate = cls(center, size)
         all_sprites.add(animate)
+        return animate
 
     def update(self):
         now = pygame.time.get_ticks()
