@@ -36,6 +36,11 @@ for i in range(9):
     img_explore_player.set_colorkey((0, 0, 0))
     explore_animation['player'].append(img_explore_player)
 
+img_buffs = {
+    'heal': pygame.image.load(os.path.join('img', 'shield.png')).convert(),
+    'gun': pygame.image.load(os.path.join('img', 'gun.png')).convert()
+}
+
 # 載入音效
 shoot_sound = pygame.mixer.Sound(os.path.join("sound", "shoot.wav"))
 gun_sound = pygame.mixer.Sound(os.path.join("sound", "pow1.wav"))
@@ -53,6 +58,7 @@ pygame.mixer.music.set_volume(0.1)
 all_sprites = pygame.sprite.Group()
 rock_sprites = pygame.sprite.Group()
 bullet_sprites = pygame.sprite.Group()
+buff_sprites = pygame.sprite.Group()
 
 # 變更視窗背景顏色
 # screen.fill((255, 255, 255))

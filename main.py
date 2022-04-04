@@ -1,9 +1,11 @@
+import random
+
 import pygame
 
 # 初始化pygame
-from models import Player, Rock, Explosion
+from models import Player, Rock, Explosion, Buff
 from settings import img_bg, init_pygame_screen, FPS, font_name, sound_explore1, sound_explore2, all_sprites, \
-    rock_sprites, bullet_sprites, sound_dead, img_player_life
+    rock_sprites, bullet_sprites, sound_dead, img_player_life, buff_sprites, shield_sound, gun_sound
 
 screen = init_pygame_screen()
 
@@ -101,8 +103,8 @@ while running:
 
     # 當子彈跟石頭有碰撞時，刪除這兩個物件
     hit_rocks = pygame.sprite.groupcollide(rock_sprites, bullet_sprites, True, True)
-    for hit_rock in hit_rocks:
-        rock_radius = hit_rock.radius
+    for rock in hit_rocks:
+        rock_radius = rock.radius
         score += rock_radius
 
         # 播放石頭爆炸音效(目前石頭半徑約為7~48不等，這邊設計是夠大的石頭才會播放A音效，反之B音效)
@@ -112,15 +114,21 @@ while running:
             sound_explore2.play()
 
         # 播放爆炸動畫
-        Explosion.create_animate(hit_rock.rect.center, 'large')
+        Explosion.create_animate(rock.rect.center, 'large')
 
+        # 隨機產生BUFF
+        # TODO: 掉落率最終要調低
+        if random.random() > 0.1:
+            Buff.create_buff(rock.rect.center)
+
+        # 重新產生新的石頭
         Rock.create_rocks()
 
     # 判斷石頭是否跟碰撞主角碰撞 (預設是矩形碰撞模式，這裡改成用圓形檢查碰撞較為準確)
     hits = pygame.sprite.spritecollide(player, rock_sprites, True, pygame.sprite.collide_circle)
-    for hit in hits:
-        player.health -= hit.radius
-        Explosion.create_animate(hit.rect.center, 'small')
+    for rock in hits:
+        player.health -= rock.radius
+        Explosion.create_animate(rock.rect.center, 'small')
 
         Rock.create_rocks()
         if player.health <= 0:
@@ -130,6 +138,15 @@ while running:
             player.die()
         else:
             sound_explore1.play()
+
+    hits = pygame.sprite.spritecollide(player, buff_sprites, True)
+    for buff in hits:
+        if buff.category == 'heal':
+            shield_sound.play()
+            player.heal()
+        elif buff.category == 'gun':
+            gun_sound.play()
+            player.gun_up()
 
     if player.lives == 0 and not dead_animate.alive():
         running = False

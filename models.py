@@ -3,7 +3,7 @@ import random
 import pygame
 
 from settings import img_player, img_bullet, img_rocks, shoot_sound, all_sprites, rock_sprites, bullet_sprites, \
-    explore_animation
+    explore_animation, img_buffs, buff_sprites
 
 
 class Player(pygame.sprite.Sprite):
@@ -26,21 +26,32 @@ class Player(pygame.sprite.Sprite):
         self.speed_x = 10
         self.speed_y = 10
 
+        # 設定血量
         self.health_default = 100
-        self.health = self.health_default  # 設定血量
+        self.health = self.health_default
 
+        # 設定生命
         self.lives = 3
         self.hidden = False
         self.hide_time = 0
 
+        # 設定武器BUFF
+        self.gun = 1
+        self.gun_time = 0
+
     def update(self):
-        if self.hidden and pygame.time.get_ticks() - self.hide_time > 1000 and self.lives > 0:
+        now = pygame.time.get_ticks()
+        if self.hidden and now - self.hide_time > 1000 and self.lives > 0:
             self.hidden = False
             self.rect.center = (self.screen_weight / 2, self.screen_height - 20)
 
         if self.hidden:
             # 如果物件處於消失狀態，禁止任何操作
             return
+
+        if self.gun > 1 and now - self.gun_time > 3000:
+            self.gun -= 1
+            self.gun_time = now
 
         # 根據玩家按下的方向鍵，控制物件位移
         key_pressed = pygame.key.get_pressed()
@@ -68,10 +79,17 @@ class Player(pygame.sprite.Sprite):
             # 隱形狀態不能射擊
             return
 
-        bullet = Bullet(self.rect.centerx, self.rect.top)
-        all_sprites.add(bullet)
-        bullet_sprites.add(bullet)
-        shoot_sound.play()
+        if self.gun == 1:
+            bullet = Bullet(self.rect.centerx, self.rect.top)
+            all_sprites.add(bullet)
+            bullet_sprites.add(bullet)
+            shoot_sound.play()
+        else:
+            bullet1 = Bullet(self.rect.left, self.rect.top)
+            bullet2 = Bullet(self.rect.right, self.rect.top)
+            all_sprites.add(bullet1, bullet2)
+            bullet_sprites.add(bullet1, bullet2)
+            shoot_sound.play()
 
     def hide(self):
         self.hidden = True
@@ -82,6 +100,19 @@ class Player(pygame.sprite.Sprite):
         self.hide()
         self.health = self.health_default
         self.lives -= 1
+
+    def heal(self):
+        """
+        吃到治療寶物時恢復生命
+        """
+        self.health += 20
+        if self.health >= self.health_default:
+            self.health = self.health_default
+
+    def gun_up(self):
+        if self.gun == 1:
+            self.gun += 1
+        self.gun_time = pygame.time.get_ticks()
 
 
 class Rock(pygame.sprite.Sprite):
@@ -192,3 +223,31 @@ class Explosion(pygame.sprite.Sprite):
                 self.image = explore_animation[self.size][self.frame]
                 self.rect = self.image.get_rect()
                 self.rect.center = center
+
+
+class Buff(pygame.sprite.Sprite):
+    def __init__(self, center):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.screen_weight, self.screen_height = pygame.display.get_surface().get_size()
+        self.category = random.choice(['heal', 'gun'])
+        self.image = img_buffs[self.category]
+        self.image.set_colorkey((0, 0, 0))
+
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.speed_y = 3
+
+    @classmethod
+    def create_buff(cls, center, groups=None):
+        if not groups:
+            groups = [all_sprites, buff_sprites]
+
+        buff = cls(center)
+        for group in groups:
+            group.add(buff)
+
+    def update(self):
+        self.rect.y += self.speed_y
+        if self.rect.top > self.screen_height:
+            self.kill()
